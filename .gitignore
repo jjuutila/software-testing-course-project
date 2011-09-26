@@ -1,13 +1,4 @@
 bin/
-doc/
-icons/
-LICENSE.txt
-macros/
-modes/
-properties/
-src/
-startup/
 .settings
-.classpath
 .project
 
