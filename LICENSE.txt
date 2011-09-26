@@ -1,1 +1,0 @@
-This package is provided only to TUT students and for the sole purpose of completing the project on the courses OHJ-3060 Ohjelmistojen testaus and OHJ-3066 Software Testing.
