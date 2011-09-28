@@ -1,57 +1,19 @@
 package org.gjt.sp.jedit.search;
 
-import static junit.framework.Assert.assertNotNull;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
+import static junit.framework.Assert.*;
+import static org.gjt.sp.jedit.search.MatchAssert.*;
 
 import org.gjt.sp.jedit.search.SearchMatcher.Match;
 import org.junit.Test;
 
 public class PatternSearchMatcherTest {
-
-	/**
-	 * <p>Tests whether or not 
-	 * {@link PatternSearchMatcher#PatternSearchMatcher(Pattern, boolean)}
-	 * enforces the Pattern flags required (case insensitivity 
-	 * iff {@code ignoreCase} is true, multiline always).</p>
-	 * @testcreated 2011-08-22
-	 * @testpriority medium
-	 */
-	@Test
-	public void patternCtorPatternFlagValidation() {
-		final String testPattern = "fo\\s*o";
-		final String text = "Fo\nOfoo";
-		
-		final List<PatternSearchMatcher> matchers = new ArrayList<PatternSearchMatcher>();
-		
-		matchers.add(new PatternSearchMatcher(testPattern, false));
-		matchers.add(new PatternSearchMatcher(Pattern.compile(testPattern), false));
-		matchers.add(new PatternSearchMatcher(Pattern.compile(testPattern, Pattern.MULTILINE | Pattern.CASE_INSENSITIVE), false));
-		
-		int index = 0;
-		Match firstMatch = null;
-		
-		for (PatternSearchMatcher m : matchers) {
-			
-			final Match actualMatch = m.nextMatch(text, true, true, true, false);
-			
-			if (index++ == 0) {
-				firstMatch = actualMatch;
-				continue;
-			}
-			
-			assertMatch("mismatch between 1th and " + (index) + "th", firstMatch.start, firstMatch.end, actualMatch.start, actualMatch.end);
-		}
-	}
 	
 	/**
 	 * <p>{@code start} is used to signify whether or not the character
 	 * sequence (could be user selected) starts from a beginning of a
 	 * line. If it doesn’t start, ^ should not match the in the beginning
 	 * of the input (the first match must be skipped).</p>
-	 * @testcreated 2011-08-22
+	 * @testcreated 2011-09-22
 	 * @testpriority medium
 	 */
 	@Test
@@ -63,6 +25,57 @@ public class PatternSearchMatcherTest {
 	    	spm.nextMatch("abbacd\nabbacd\n", true, true, true, false));
 	}
 	
+	/**
+	 * <p>Like {@link #trueStartMatchesFromBeginningOfTheLine()} but
+	 * expect it to match on the line after first LF.</p>
+	 * @testcreated 2011-09-28
+	 * @testpriority medium
+	 */
+	@Test
+	public void falseStartMatchesFromNextLine() {
+		final PatternSearchMatcher spm =
+	        new PatternSearchMatcher("^abbacd$", false);
+	
+	    assertMatch(7, 13, 
+	    	spm.nextMatch("abbacd\nabbacd\n", false, true, true, false));
+	}
+	
+	/**
+	 * <p>{@code end} is used to signify whether or not the character
+	 * sequence (could be user selected) ends to end of line.
+	 * If it doesn’t end, $ should not match the in the end
+	 * of the input (the last match must be skipped).</p>
+	 * @testcreated 2011-09-22
+	 * @testpriority medium
+	 */
+	@Test
+	public void trueEndMatchesToTheEnd() {
+	    final PatternSearchMatcher spm =
+	        new PatternSearchMatcher("^abbacd$", false);
+	
+	    assertMatch(7, 13, 
+	    	spm.nextMatch("abbacd\nabbacd\n", false, true, true, false));
+	}
+	
+	/**
+	 * <p>Like {@link #trueEndMatchesToTheEnd()} but
+	 * expect it to match on the line before the last LF.</p>
+	 * @testcreated 2011-09-28
+	 * @testpriority medium
+	 */
+	@Test
+	public void falseEndMatchesToTheEOLBeforeLast() {
+		final PatternSearchMatcher spm =
+	        new PatternSearchMatcher("^abbacd$", false);
+	
+	    assertMatch(0, 6, 
+	    	spm.nextMatch("abbacd\nabbacd\n", true, false, true, false));
+	}	
+	
+	/**
+	 * @testcreated 2011-09-28
+	 * @testpriority medium
+	 */
 	@Test
 	public void trueFirstTimeMatchesFirstMatch() {
 		final PatternSearchMatcher spm =
@@ -72,6 +85,10 @@ public class PatternSearchMatcherTest {
 			spm.nextMatch("\nabbacd\nabbacd\n", true, true, true, false));
 	}
 
+	/**
+	 * @testcreated 2011-09-28
+	 * @testpriority medium
+	 */
 	@Test
 	public void falseFirstTimeMatchesSecondMatch() {
 		final PatternSearchMatcher spm =
@@ -85,7 +102,7 @@ public class PatternSearchMatcherTest {
 	 * <p>Validates the behaviour of {@code firstTime} with reverse
 	 * matching. When {@code firstTime} is {@code true} the last possible
 	 * match must be returned.</p>
-	 * @testcreated 2011-08-22
+	 * @testcreated 2011-09-22
 	 * @testpriority medium
 	 */
 	@Test
@@ -104,7 +121,7 @@ public class PatternSearchMatcherTest {
 	
 	/**
 	 * <p>Opposite to {@link #trueFirstTimeMatchesFirstMatch()}.</p>
-	 * @testcreated 2011-08-22
+	 * @testcreated 2011-09-22
 	 * @testpriority medium
 	 */
 	@Test
@@ -120,43 +137,6 @@ public class PatternSearchMatcherTest {
 			spm.nextMatch(text, true, true, false, true));
 	}
 	
-	private void assertMatch(int start, int end, Match m) {
-		assertNotNull("no match", m);
-		assertMatch(start, end, m.start, m.end);
-	}
 	
-	private void assertReverseMatch(String text, int start, int end, Match m) {
-		assertNotNull("no match", m);
-		
-		int matchLength = m.end - m.start;
-		int correctedEnd = text.length() - m.start;
-		int correctedStart = correctedEnd - matchLength;
-		assertMatch(start, end, correctedStart, correctedEnd);
-	}
-	
-	private void assertMatch(int start, int end, int actualStart, int actualEnd) {
-		assertMatch(null, start, end, actualStart, actualEnd);
-	}
-	
-	private void assertMatch(String message, int start, int end, int actualStart, int actualEnd) {
-		assertIndex("start", start);
-		assertIndex("end", end);
-		assertIndex("m.start", actualStart);
-		assertIndex("m.end", actualEnd);
-		
-		if (start != actualStart || end != actualEnd) {
-			throw new AssertionError(
-				String.format(
-					(message != null ? message + ": " : "") 
-					+ "Expected <%d, %d> but was: <%d, %d>", start, end, actualStart, actualEnd));
-		}
-	}
-	
-	private void assertIndex(String name, int index) {
-		if (index < 0) {
-			throw new AssertionError(
-				String.format("Invalid index" + (name != null ? " for " + name : "") + ": %d", index));
-		}
-	}
 
 }
