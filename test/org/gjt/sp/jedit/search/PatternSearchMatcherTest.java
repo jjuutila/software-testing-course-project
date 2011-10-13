@@ -137,6 +137,18 @@ public class PatternSearchMatcherTest {
 			spm.nextMatch(text, true, true, false, true));
 	}
 	
+	/**
+	 * <p>Tests if matcher can handle chars outside of ASCII charset.</p>
+	 * @testcreated 2011-10-11
+	 * @testpriority low
+	 */
+	@Test
+	public void trueMatchesNonAscii() {
+		final PatternSearchMatcher spm =
+		        new PatternSearchMatcher("ää", false);
+	    
+		assertMatch(2, 4, 
+				spm.nextMatch("aoääff", true, true, true, false));
+	}
 	
-
 }
