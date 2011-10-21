@@ -7,7 +7,8 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({
 	PatternSearchMatcherConformanceTest.class,
-	PatternSearchMatcherTest.class
+	PatternSearchMatcherTest.class,
+	DocumentSearchTest.class
 })
 public class AllTests {
 

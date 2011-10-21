@@ -143,12 +143,20 @@ public class PatternSearchMatcherTest {
 	 * @testpriority low
 	 */
 	@Test
-	public void trueMatchesNonAscii() {
-		final PatternSearchMatcher spm =
-		        new PatternSearchMatcher("ää", false);
-	    
-		assertMatch(2, 4, 
-				spm.nextMatch("aoääff", true, true, true, false));
+	public void matchesNonAscii() {
+        final String text = "aoääffЩ௫𐍈";
+        
+        final PatternSearchMatcher spm1 =
+                new PatternSearchMatcher("ää", false);
+        
+        final PatternSearchMatcher spm2 =
+                new PatternSearchMatcher("Щ௫", false);
+        
+        assertMatch(2, 4, 
+        		spm1.nextMatch(text, true, true, true, false));
+        
+        assertMatch(4,6, 
+                spm2.nextMatch(text, true, true, true, false));
 	}
 	
 }
