@@ -157,5 +157,14 @@ public class PatternSearchMatcherTest {
         assertMatch(6, 8, 
                 spm.nextMatch(text, true, true, true, false));
 	}
-	
+
+    @Test
+    public void falseFirstTimeMatchesSecondToLastZeroWidthReverseMatch() {
+        final PatternSearchMatcher spm = new PatternSearchMatcher("(?=.*$)",
+                false);
+        String text = "abbacda ";
+
+        assertReverseMatch(text, 7, 7,
+                spm.nextMatch(text, true, true, false, true));
+    }
 }
