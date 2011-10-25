@@ -3,6 +3,9 @@ package org.gjt.sp.jedit.search;
 import static junit.framework.Assert.*;
 import static org.gjt.sp.jedit.search.MatchAssert.*;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.gjt.sp.jedit.search.SearchMatcher.Match;
 import org.junit.Test;
 
@@ -135,9 +138,10 @@ public class PatternSearchMatcherTest {
 		// so we'll need to do substring(0, 21) in order to accomodate
 		// this use case
 		
-		//			              111 1111111 2 2
+		//                        111 1111111 2 2
 		//             012345 6789012 3456789 0 1
 		String text = "abbacd\nabbacd\nabbacd\n\n".substring(0, 21);
+		//                             ^      ^ (non inclusive)
 		
 		assertReverseMatch(text, 14, 20,
 			spm.nextMatch(text, true, true, false, true));
@@ -212,5 +216,74 @@ public class PatternSearchMatcherTest {
         
         assertReverseMatch(text, 6, 8,
         		spm.nextMatch(text, true, false, true, true));
+    }
+    
+    /**
+     * <p>While zero width matching patterns are not of great interest to the
+     * user to use the class should handle them gracefully by allowing the user
+     * step through each character of the document.</p>
+     * @testcreated 2011-10-25
+     * @testpriority low
+     */
+    @Test
+    public void zeroWidthMatches() {
+    	final PatternSearchMatcher spm = new PatternSearchMatcher("(?=.*$)", false);
+
+    	Pattern p = Pattern.compile("(?=.*$)");
+    	Matcher m = p.matcher("abbacd\n");
+    	assertTrue(m.find());
+    	assertEquals(0, m.start());
+    	assertEquals(0, m.end());
+    	assertTrue(m.find());
+    	assertEquals(1, m.start());
+    	assertEquals(1, m.end());
+    	
+    	//                        1111111 11
+    	//             01234567 890123456 78
+        String text = "abbacda \nabbacda \n";
+        //                                ^
+        //                              ^
+        assertReverseMatch(text, 0, 0,
+        		spm.nextMatch(text, true, true, true, false));
+        
+        assertReverseMatch(text, 1, 1,
+        		spm.nextMatch(text, true, true, false, false));
+    }
+    
+    /**
+     * <p>Like {@link #zeroWidthMatches()} but for reverse matching.</p>
+     * @testcreated 2011-10-25
+     * @testpriority low
+     */
+    @Test
+    public void zeroWidthReverseMatches() {
+    	final PatternSearchMatcher spm = new PatternSearchMatcher("(?=.*$)", false);
+
+    	//                        1111111 11
+    	//             01234567 890123456 78
+        String text = "abbacda \nabbacda \n";
+        //                                ^
+        //                              ^
+        assertReverseMatch(text, 18, 18,
+        		spm.nextMatch(text, true, true, true, true));
+        
+        assertReverseMatch(text, 17, 17,
+        		spm.nextMatch(text, true, true, false, true));
+    }
+    
+    /**
+     * <p>A zero width match pattern such as <code>(?=.*$)</code> should be handled
+     * as a no match when tried against empty selection. This is of low importance
+     * because two unlikely actions need to happen; first the user must be using a pattern
+     * that is zero width matching pattern, second the users empty selection must be passed over
+     * to the {@link PatternSearchMatcher}.</p>
+     * @testcreated 2011-10-25
+     * @testpriority low
+     */
+    @Test
+    public void emptyZeroWidthMatchIsHandledGracefully() {
+    	final PatternSearchMatcher spm = new PatternSearchMatcher("(?=.*$)", false);
+       
+        assertNull(spm.nextMatch("", true, true, true, true));
     }
 }
