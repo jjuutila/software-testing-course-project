@@ -13,8 +13,14 @@ import org.junit.Test;
 
 public class DocumentSearchTest {
 
+	/**
+	 * This is the regex we are searching for
+	 */
 	private static final String NEEDLE = "vi";
 	
+	/**
+	 * These are the matches we expect to find from {@link #DOCUMENT} using {@link #NEEDLE}
+	 */
 	private static final Set<MatchStatus> EXPECTED_MATCHES = Collections.unmodifiableSet(new LinkedHashSet<MatchStatus>(
 		Arrays.asList(
 				new MatchStatus(241, 243),
@@ -29,7 +35,10 @@ public class DocumentSearchTest {
 		)
 	));
 	
-	private final String document = 
+	/**
+	 * This is our text document we want to search through
+	 */
+	private static final String DOCUMENT = 
 		"Lorem ipsum dolor sit amet, consectetur adipiscing elit.\n" + 
 		"Nullam odio eros, ultrices id ornare at, auctor vel felis.\n" +
 		"Nulla facilisis metus nulla, id auctor elit.\n" +
@@ -59,22 +68,30 @@ public class DocumentSearchTest {
 	}
 
 	private void documentMatchingScenario(boolean reverse) {
-		String text = document;
+		
+		// this is our view over the document containing all of the "not matched" text.
+		// in the beginning it's the whole document.
+		String text = DOCUMENT;
 		
 		final PatternSearchMatcher spm =
 		        new PatternSearchMatcher(NEEDLE, true);
 		
-		int offset = 0; // not updated if reverse == true
+		int offset = 0; // not updated if reverse == true, more commentary below
 		Match match = null;
 		Set<MatchStatus> matches = new LinkedHashSet<MatchStatus>();
 		
 		while ((match = spm.nextMatch(text, true, true, matches.isEmpty(), reverse)) != null) {
 			
 			MatchStatus ms = new MatchStatus(match, offset);
+			
 			if (!reverse) {
+				// offset is used to keep track on how far we are in the document
 				offset += match.end;
 				text = text.substring(match.end);
 			} else {
+				// for reverse searches the semantics are different; first we need
+				// to reverse the match, then we substring from the beginning to until the
+				// reversed match end
 				ms = ms.reverse(text.length());
 				text = text.substring(0, text.length() - match.end);
 			}
@@ -98,7 +115,6 @@ public class DocumentSearchTest {
 	/**
 	 * Wrapper class for {@link Match} which implements hashCode and equals
 	 * @author joonas
-	 *
 	 */
 	private static class MatchStatus {
 		private final Match m;
@@ -118,7 +134,8 @@ public class DocumentSearchTest {
 		}
 		
 		/**
-		 * @param textLength the length of the matched text for which this MatchStatus represents a reverse (counted from the end) match
+		 * @param textLength the length of the matched text for which this 
+		 * 					 MatchStatus represents a reverse (counted from the end) match
 		 * @return a reversed MatchStatus in relation to the given {@code textLength}
 		 */
 		public MatchStatus reverse(int textLength) {
