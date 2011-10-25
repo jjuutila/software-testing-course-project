@@ -129,9 +129,15 @@ public class PatternSearchMatcherTest {
 		final PatternSearchMatcher spm =
 			new PatternSearchMatcher("^.*$", false);
 
+		// we substring here to adhere to the normal usage convention
+		// of #nextMatch(..); while finding the first reverse match
+		// firstTime=true will return (21,21) (in reversed, see above)
+		// so we'll need to do substring(0, 21) in order to accomodate
+		// this use case
+		
 		//			              111 1111111 2 2
 		//             012345 6789012 3456789 0 1
-		String text = "abbacd\nabbacd\nabbacd\n\n";
+		String text = "abbacd\nabbacd\nabbacd\n\n".substring(0, 21);
 		
 		assertReverseMatch(text, 14, 20,
 			spm.nextMatch(text, true, true, false, true));
