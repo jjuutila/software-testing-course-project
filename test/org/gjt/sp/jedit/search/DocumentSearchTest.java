@@ -57,7 +57,10 @@ public class DocumentSearchTest {
 	
 	
 	/**
-	 * 
+	 * <p>Makes sure that {@link PatternSearchMatcher} can find all matches of
+	 * {@link #NEEDLE} in the {@link #DOCUMENT}.</p>
+	 * @testcreated 2011-10-21
+	 * @testpriority high
 	 */
 	@Test
 	public void findAllMatchesForward() {
@@ -104,6 +107,11 @@ public class DocumentSearchTest {
 		assertTrue("not all matches were found: " + matches, matches.isEmpty());
 	}
 	
+	/**
+	 * <p>Like {@link #findAllMatchesForward()} but finds the matches in reverse fashion.</p>
+	 * @testcreated 2011-10-25
+	 * @testpriority high
+	 */
 	@Test
 	public void findAllMatchesReverse() {
 		
