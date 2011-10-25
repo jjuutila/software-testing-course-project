@@ -8,7 +8,7 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
 	PatternSearchMatcherConformanceTest.class,
 	PatternSearchMatcherTest.class,
-	DocumentSearchTest.class
+	PatternSearchMatcherDocumentSearchTest.class
 })
 public class AllTests {
 

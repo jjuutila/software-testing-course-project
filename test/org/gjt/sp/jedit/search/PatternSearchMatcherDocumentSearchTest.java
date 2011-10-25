@@ -11,7 +11,7 @@ import java.util.Set;
 import org.gjt.sp.jedit.search.SearchMatcher.Match;
 import org.junit.Test;
 
-public class DocumentSearchTest {
+public class PatternSearchMatcherDocumentSearchTest {
 
 	/**
 	 * This is the regex we are searching for
