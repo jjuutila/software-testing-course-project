@@ -27,7 +27,7 @@ public abstract class MatchAssert {
 	
 	/**
 	 * asserts that the match returned from a reverse match has the correct {@code start} and
-	 * {@code end} values. This differs from {@link #assertMatch(int, int, Match)} by requring
+	 * {@code end} values. This differs from {@link #assertReverseMatch(int, int, int, Match)} by requring
 	 * the matched {@code text} in order to reverse the expected start and end values. 
 	 * @param text the matched text (used for length only)
 	 * @param start the non-reversed expected start
