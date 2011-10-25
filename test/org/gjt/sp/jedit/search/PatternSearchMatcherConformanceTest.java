@@ -1,6 +1,7 @@
 package org.gjt.sp.jedit.search;
 
 import static org.gjt.sp.jedit.search.MatchAssert.*;
+import static org.junit.Assert.assertNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,5 +90,18 @@ public class PatternSearchMatcherConformanceTest {
 	public void nextMatchThrowsForNullBuffer() {
 		PatternSearchMatcher m = new PatternSearchMatcher("foo", false);
 		m.nextMatch(null, true, true, true, false);
+	}
+	
+	/**
+	 * <p>Assures that nextMatch handles matching against empty region gracefully without returning a result;
+	 * this is of medium importance because it's not impossible that the user could have an empty selection and
+	 * that selection would at some point get passed to {@link PatternSearchMatcher}.</p>
+	 * @testcreated 2011-09-25
+	 * @testpriority medium
+	 */
+	@Test
+	public void nextMatchReturnsNoMatchForEmptyBuffer() {
+		PatternSearchMatcher m = new PatternSearchMatcher("foo", false);
+		assertNull(m.nextMatch("", true, true, true, false));
 	}
 }
