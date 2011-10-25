@@ -164,13 +164,53 @@ public class PatternSearchMatcherTest {
                 spm.nextMatch(text, true, true, true, false));
 	}
 
-    @Test
-    public void falseFirstTimeMatchesSecondToLastZeroWidthReverseMatch() {
-        final PatternSearchMatcher spm = new PatternSearchMatcher("(?=.*$)",
-                false);
+	/**
+	 * <p>Tests for the negative case of pattern with a match to (line) end cannot
+	 * find a suitable match if the {@code end} is <code>false</code>; this would be the
+	 * case when user has selected "abbacda " from the middle of a line in a text document.</p>
+	 * @testcreated 2011-10-25
+	 * @testpriority medium
+	 */
+	@Test
+	public void endMatchingPatternDoesNotFindMatchWithFalseEnd() {
+		final PatternSearchMatcher spm = new PatternSearchMatcher("a.$", false);
         String text = "abbacda ";
 
-        assertReverseMatch(text, 7, 7,
-                spm.nextMatch(text, true, true, false, true));
+        assertNull(spm.nextMatch(text, true, false, true, false));
+	}
+	
+	/**
+	 * <p>Tests that with a (line) end matching pattern the second to last returning
+	 * code path is triggered when {@code end} is <code>false</code> (see situation 
+	 * explanation from {@link #endMatchingPatternDoesNotFindMatchWithFalseEnd()}).</p>
+	 * @testcreated 2011-10-25
+	 * @testpriority medium
+	 */
+	@Test
+	public void endMatchingPatternFindsTheSecondToLastWithFalseEnd() {
+		final PatternSearchMatcher spm = new PatternSearchMatcher("a.$", false);
+		//             01234567 8901234567
+		String text = "abbacda \nabbacda ";
+		//                   ^  ^ (not inclusive)
+        
+		assertMatch(6, 8,
+				spm.nextMatch(text, true, false, true, false));
+	}
+	
+	/**
+	 * <p>Like {@link #endMatchingPatternFindsTheSecondToLastWithFalseEnd()} but
+	 * this time in reverse.</p>
+	 * @testcreated 2011-10-25
+	 * @testpriority medium
+	 */
+    @Test
+    public void endMatchingPatternFindsTheSecondToLastReverseWithFalseEnd() {
+    	final PatternSearchMatcher spm = new PatternSearchMatcher("a.$", false);
+        //             01234567 8901234567
+        String text = "abbacda \nabbacda ";
+        //                   ^  ^ (not inclusive)
+        
+        assertReverseMatch(text, 6, 8,
+        		spm.nextMatch(text, true, false, true, true));
     }
 }
