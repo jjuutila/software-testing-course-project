@@ -1,16 +1,15 @@
 package org.gjt.sp.jedit.search;
 
-import static org.gjt.sp.jedit.search.MatchAssert.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.junit.Test;
 import org.gjt.sp.jedit.search.SearchMatcher.Match;
-import static junit.framework.Assert.*;
+import org.junit.Test;
 
 public class DocumentSearchTest {
 
@@ -54,20 +53,33 @@ public class DocumentSearchTest {
 	@Test
 	public void findAllMatchesForward() {
 		
+		boolean reverse = false;
+		
+		documentMatchingScenario(reverse);
+	}
+
+	private void documentMatchingScenario(boolean reverse) {
 		String text = document;
 		
 		final PatternSearchMatcher spm =
 		        new PatternSearchMatcher(NEEDLE, true);
 		
-		int offset = 0;
+		int offset = 0; // not updated if reverse == true
 		Match match = null;
 		Set<MatchStatus> matches = new LinkedHashSet<MatchStatus>();
 		
-		while ((match = spm.nextMatch(text, true, true, matches.isEmpty(), false)) != null) {
+		while ((match = spm.nextMatch(text, true, true, matches.isEmpty(), reverse)) != null) {
+			
 			MatchStatus ms = new MatchStatus(match, offset);
+			if (!reverse) {
+				offset += match.end;
+				text = text.substring(match.end);
+			} else {
+				ms = ms.reverse(text.length());
+				text = text.substring(0, text.length() - match.end);
+			}
+			
 			assertTrue("duplicate match: " + ms + " for " + matches, matches.add(ms));
-			text = text.substring(match.end);
-			offset += match.end;
 		}
 		
 		assertEquals("not enough matches in " + matches, 9, matches.size());
@@ -77,23 +89,10 @@ public class DocumentSearchTest {
 	
 	@Test
 	public void findAllMatchesReverse() {
-		String text = document;
 		
-		final PatternSearchMatcher spm =
-		        new PatternSearchMatcher(NEEDLE, true);
+		boolean reverse = true;
 		
-		Match match = null;
-		Set<MatchStatus> matches = new LinkedHashSet<MatchStatus>();
-		
-		while ((match = spm.nextMatch(text, true, true, matches.isEmpty(), true)) != null) {
-			MatchStatus ms = new MatchStatus(match, 0).reverse(text.length());
-			assertTrue("duplicate match: " + ms + " for " + matches, matches.add(ms));
-			text = text.substring(0, text.length() - match.end);
-		}
-		
-		assertEquals("not enough matches in " + matches, 9, matches.size());
-		assertTrue(matches.removeAll(EXPECTED_MATCHES));
-		assertTrue("not all matches were found: " + matches, matches.isEmpty());
+		documentMatchingScenario(reverse);
 	}
 	
 	/**
