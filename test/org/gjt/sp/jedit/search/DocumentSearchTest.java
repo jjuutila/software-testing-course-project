@@ -72,39 +72,45 @@ public class DocumentSearchTest {
 
 	private void documentMatchingScenario(boolean reverse) {
 		
-		// this is our view over the document containing all of the "not matched" text.
-		// in the beginning it's the whole document.
-		String text = DOCUMENT;
-		
 		final PatternSearchMatcher spm =
 		        new PatternSearchMatcher(NEEDLE, true);
+		
+		Set<MatchStatus> matches = findAllMatches(spm, DOCUMENT, reverse);
+		
+		assertEquals("not enough matches in " + matches, EXPECTED_MATCHES.size(), matches.size());
+		assertTrue(matches.removeAll(EXPECTED_MATCHES));
+		assertTrue("not all matches were found: " + matches, matches.isEmpty());
+	}
+
+	private Set<MatchStatus> findAllMatches(PatternSearchMatcher matcher, String text, boolean reverse) {
+		// this is our view over the document containing all of the "not matched" text.
+		// in the beginning it's the whole document.
+		String documentView = text;
 		
 		int offset = 0; // not updated if reverse == true, more commentary below
 		Match match = null;
 		Set<MatchStatus> matches = new LinkedHashSet<MatchStatus>();
 		
-		while ((match = spm.nextMatch(text, true, true, matches.isEmpty(), reverse)) != null) {
+		while ((match = matcher.nextMatch(documentView, true, true, matches.isEmpty(), reverse)) != null) {
 			
 			MatchStatus ms = new MatchStatus(match, offset);
 			
 			if (!reverse) {
 				// offset is used to keep track on how far we are in the document
 				offset += match.end;
-				text = text.substring(match.end);
+				documentView = documentView.substring(match.end);
 			} else {
 				// for reverse searches the semantics are different; first we need
 				// to reverse the match, then we substring from the beginning to until the
 				// reversed match end
-				ms = ms.reverse(text.length());
-				text = text.substring(0, text.length() - match.end);
+				ms = ms.reverse(documentView.length());
+				documentView = documentView.substring(0, documentView.length() - match.end);
 			}
 			
 			assertTrue("duplicate match: " + ms + " for " + matches, matches.add(ms));
 		}
 		
-		assertEquals("not enough matches in " + matches, 9, matches.size());
-		assertTrue(matches.removeAll(EXPECTED_MATCHES));
-		assertTrue("not all matches were found: " + matches, matches.isEmpty());
+		return matches;
 	}
 	
 	/**
